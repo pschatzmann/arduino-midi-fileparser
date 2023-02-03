@@ -1,1 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/c++  -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -mmacosx-version-min=11.7 -Wl,-search_paths_first -Wl,-headerpad_max_install_names "CMakeFiles/midi-parse.dir/parse.ino.o" "CMakeFiles/midi-parse.dir/Users/pschatzmann/Dev/Arduino/libraries/arduino-midi-fileparser/examples/main.cpp.o" -o midi-parse 
