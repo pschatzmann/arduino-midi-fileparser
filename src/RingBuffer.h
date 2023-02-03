@@ -15,6 +15,11 @@ class RingBuffer {
 public:
   RingBuffer() = default;
 
+  RingBuffer(RingBuffer &t){
+    _aucBuffer = nullptr;
+    reset();
+  }
+
   RingBuffer(int size) {
     resize(size);
     reset();
@@ -135,7 +140,7 @@ public:
 
   /// @brief Removes the next n characters from the ringbuffer
   void consume(int offset) {
-    assert(available() > offset);
+    assert(available() >= offset);
     for (int j = 0; j < offset; j++) {
       read();
     }

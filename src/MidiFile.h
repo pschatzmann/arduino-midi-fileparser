@@ -18,7 +18,7 @@
 #include "MidiFileCommon.h"
 
 #define MIDI_BUFFER_SIZE 1024 * 2
-
+#define MIDI_MIN_REFILL_SIZE 512 
 /**
  * @brief Midi File parser. Provide the data via write: You should try to keep
  * the buffer as full as possible while parsing. You get the next parsing result
@@ -29,8 +29,8 @@ class MidiFile {
 public:
   bool begin(bool log = true, int bufferSize = MIDI_BUFFER_SIZE) {
     log_active = log;
-    has_more_data = true;
     parser_state.in.resize(bufferSize);
+    is_ok = true;
     reset();
     return true;
   }
@@ -39,9 +39,7 @@ public:
     // store actual processing length
     if (len > 0) {
       write_len = len;
-    } else {
-      has_more_data = false;
-    }
+    } 
     // write only if data is available
     if (len < parser_state.in.availableForWrite()) {
       return parser_state.in.write(data, len);
@@ -52,27 +50,28 @@ public:
   int availableForWrite() { return parser_state.in.availableForWrite(); }
 
   /// Parse and provide next midi element
-  midi_parser_state parse() {
-    // make sure that we do not run out of data
-    if (parser_state.in.available() < 100 && has_more_data) {
-      printf("MIDI_PARSER_MORE_DATA\n");
-      parser_state.status_result = MIDI_PARSER_MORE_DATA;
-      return parser_state;
-    }
+  midi_parser_state &parse() {
     // parse next element
+    parser_state.status = MIDI_PARSER_EOB;
     if (!parser_state.in.isEmpty()) {
       midi_parser_status status = midi_parse();
-      parser_state.status_result = status;
+      parser_state.status = status;
       if (log_active) {
         logStatus(status);
       }
     }
+    // 
+    if (parser_state.status == MIDI_PARSER_EOB || parser_state.status == MIDI_PARSER_ERROR ){
+      is_ok = false;
+    }
     return parser_state;
   }
 
+  operator bool() {
+    return is_ok;
+  }
+
   void end() {
-    reset();
-    has_more_data = false;
   }
 
   const char *midi_status_name(int status) {
@@ -153,7 +152,7 @@ protected:
   bool log_active = false;
   int write_len = 256;
   midi_parser_state parser_state;
-  bool has_more_data = true;
+  bool is_ok = true;
 
   void logStatus(midi_parser_status status) {
     switch (status) {
@@ -166,11 +165,11 @@ protected:
       break;
 
     case MIDI_PARSER_INIT:
-      printf("MIDI_PARSER_INIT");
+      printf("MIDI_PARSER_INIT\n");
       break;
 
     case MIDI_PARSER_HEADER:
-      printf("header\n");
+      printf("\nheader\n");
       printf("  size: %d\n", parser_state.header.size);
       printf("  format: %d [%s]\n", parser_state.header.format,
              midi_file_format_name(parser_state.header.format));
@@ -179,12 +178,12 @@ protected:
       break;
 
     case MIDI_PARSER_TRACK:
-      printf("track\n");
+      printf("\ntrack\n");
       printf("  length: %d\n", parser_state.track.size);
       break;
 
     case MIDI_PARSER_TRACK_MIDI:
-      printf("track-midi\n");
+      printf("\ntrack-midi\n");
       printf("  time: %ld\n", (long)parser_state.vtime);
       printf("  status: %d [%s]\n", parser_state.midi.status,
              midi_status_name(parser_state.midi.status));
@@ -194,7 +193,7 @@ protected:
       break;
 
     case MIDI_PARSER_TRACK_META:
-      printf("track-meta\n");
+      printf("\ntrack-meta\n");
       printf("  time: %ld\n", (long)parser_state.vtime);
       printf("  type: %d [%s]\n", parser_state.meta.type,
              midi_meta_name(parser_state.meta.type));
@@ -202,12 +201,12 @@ protected:
       break;
 
     case MIDI_PARSER_TRACK_SYSEX:
-      printf("track-sysex\n");
+      printf("\ntrack-sysex\n");
       printf("  time: %ld\n", (long)parser_state.vtime);
       break;
 
     default:
-      printf("unhandled state: %d\n", status);
+      printf("\nunhandled state: %d\n", status);
       break;
     }
   }
@@ -215,6 +214,7 @@ protected:
   void reset() {
     parser_state.in.reset();
     parser_state.status = MIDI_PARSER_INIT;
+    parser_state.status_internal = MIDI_PARSER_INIT;
   }
 
   int midi_event_datalen(int status) {
@@ -251,7 +251,7 @@ protected:
     if (parser_state.in.available() < 14)
       return MIDI_PARSER_EOB;
 
-    if (parser_state.in.equals("MThd"))
+    if (!parser_state.in.equals("MThd"))
       return MIDI_PARSER_ERROR;
 
     parser_state.header.size = midi_parse_be32(parser_state.in.peekStr(4, 4));
@@ -262,7 +262,7 @@ protected:
         midi_parse_be16(parser_state.in.peekStr(12, 1));
 
     parser_state.in.consume(14);
-    parser_state.status = MIDI_PARSER_HEADER;
+    parser_state.status_internal = MIDI_PARSER_HEADER;
     return MIDI_PARSER_HEADER;
   }
 
@@ -271,7 +271,7 @@ protected:
       return MIDI_PARSER_EOB;
 
     parser_state.track.size = midi_parse_be32(parser_state.in.peekStr(0, 4));
-    parser_state.status = MIDI_PARSER_TRACK;
+    parser_state.status_internal = MIDI_PARSER_TRACK;
     parser_state.in.consume(8);
     // parser.in.available() -= 8;
     parser_state.buffered_status = MIDI_STATUS_NA;
@@ -303,6 +303,10 @@ protected:
         return false;
 
       cont = b & 0x80;
+    }
+
+    if (parser_state.in.available()<nbytes){
+      return false;
     }
 
     parser_state.in.consume(nbytes);
@@ -441,7 +445,7 @@ protected:
     if (parser_state.in.isEmpty())
       return MIDI_PARSER_EOB;
 
-    switch (parser_state.status) {
+    switch (parser_state.status_internal) {
     case MIDI_PARSER_INIT:
       return midi_parse_header();
 
@@ -451,7 +455,7 @@ protected:
     case MIDI_PARSER_TRACK:
       if (parser_state.track.size == 0) {
         // we reached the end of the track
-        parser_state.status = MIDI_PARSER_HEADER;
+        parser_state.status_internal = MIDI_PARSER_HEADER;
         return midi_parse();
       }
       return midi_parse_event();

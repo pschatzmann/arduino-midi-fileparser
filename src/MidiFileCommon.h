@@ -2,7 +2,6 @@
 #include "RingBuffer.h"
 
 enum midi_parser_status {
-  MIDI_PARSER_MORE_DATA = -3,
   MIDI_PARSER_EOB = -2,
   MIDI_PARSER_ERROR = -1,
   MIDI_PARSER_INIT = 0,
@@ -80,8 +79,8 @@ struct midi_sysex_event {
 };
 
 struct midi_parser_state {
-  enum midi_parser_status status_result;
   enum midi_parser_status status;
+  enum midi_parser_status status_internal;
   enum midi_status buffered_status;
   unsigned buffered_channel;
 
