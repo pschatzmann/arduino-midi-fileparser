@@ -23,7 +23,7 @@ git clone https://github.com/pschatzmann/arduino-midi-fileparser
 
 You can build the example sketch on the desktop 
 ```
-cd ~/Documents/Arduino/libraries/libraries/arduino-midi-fileparser/examples/midi-parse
+cd ~/Documents/Arduino/libraries/libraries/arduino-midi-fileparser/examples/midi-parser
 mkdir build
 cd build
 cmake ..
