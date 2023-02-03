@@ -27,6 +27,7 @@
  */
 class MidiFile {
 public:
+  /// Initializes & starts the processing
   bool begin(bool log = true, int bufferSize = MIDI_BUFFER_SIZE) {
     log_active = log;
     parser_state.in.resize(bufferSize);
@@ -35,6 +36,7 @@ public:
     return true;
   }
 
+  /// Feed/Provide the midi data to the parser
   size_t write(const uint8_t *data, size_t len) {
     // store actual processing length
     if (len > 0) {
@@ -47,9 +49,10 @@ public:
     return 0;
   }
 
+  /// Max number of bytes that we can write
   int availableForWrite() { return parser_state.in.availableForWrite(); }
 
-  /// Parse and provide next midi element
+  /// Parse data in order to provide the next midi element
   midi_parser_state &parse() {
     // parse next element
     parser_state.status = MIDI_PARSER_EOB;
@@ -60,20 +63,23 @@ public:
         logStatus(status);
       }
     }
-    // 
+    // update is_ok
     if (parser_state.status == MIDI_PARSER_EOB || parser_state.status == MIDI_PARSER_ERROR ){
       is_ok = false;
     }
     return parser_state;
   }
 
+  /// Returns false after an error or when all data has been consumed
   operator bool() {
     return is_ok;
   }
 
+  /// Ends the processing: currently does nothing
   void end() {
   }
 
+  /// Provides the string description for the midi_status value
   const char *midi_status_name(int status) {
     switch (status) {
     case MIDI_STATUS_NOTE_OFF:
@@ -96,6 +102,7 @@ public:
     }
   }
 
+  /// Provides the string description for the file format 
   const char *midi_file_format_name(int fmt) {
     switch (fmt) {
     case MIDI_FILE_FORMAT_SINGLE_TRACK:
@@ -110,6 +117,7 @@ public:
     }
   }
 
+  /// Provides the string description for the midi_meta value
   const char *midi_meta_name(int type) {
     switch (type) {
     case MIDI_META_SEQ_NUM:

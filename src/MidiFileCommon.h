@@ -1,6 +1,9 @@
 #pragma once
 #include "RingBuffer.h"
 
+/**
+ * @brief MIDI Parser Status
+ */
 enum midi_parser_status {
   MIDI_PARSER_EOB = -2,
   MIDI_PARSER_ERROR = -1,
@@ -18,6 +21,10 @@ enum midi_file_format {
   MIDI_FILE_FORMAT_MULTIPLE_SONGS = 2,
 };
 
+/**
+ * @brief MIDI Header Information
+ */
+
 struct midi_header {
   int32_t size;
   uint16_t format;
@@ -25,6 +32,9 @@ struct midi_header {
   int16_t time_division;
 };
 
+/**
+ * @brief MIDI Track Information
+ */
 struct midi_track {
   int32_t size;
 };
@@ -39,6 +49,10 @@ enum midi_status {
   MIDI_STATUS_CHANNEL_AT = 0xD, // after touch
   MIDI_STATUS_PITCH_BEND = 0xE,
 };
+
+/**
+ * @brief MIDI Metadata Information
+ */
 
 enum midi_meta {
   MIDI_META_SEQ_NUM = 0x00,
@@ -58,6 +72,10 @@ enum midi_meta {
   MIDI_META_SEQ_SPECIFIC = 0x7F,
 };
 
+/**
+ * @brief MIDI Event Information
+ */
+
 struct midi_midi_event {
   unsigned status : 4;
   unsigned channel : 4;
@@ -65,11 +83,19 @@ struct midi_midi_event {
   uint8_t param2;
 };
 
+/**
+ * @brief MIDI Metadata Event Information
+ */
+
 struct midi_meta_event {
   uint8_t type;
   int32_t length;
   const uint8_t *bytes; // reference to the input buffer
 };
+
+/**
+ * @brief MIDI Sysex Event Information
+ */
 
 struct midi_sysex_event {
   uint8_t sysex;
@@ -77,6 +103,10 @@ struct midi_sysex_event {
   int32_t length;
   const uint8_t *bytes; // reference to the input buffer
 };
+
+/**
+ * @brief MIDI Parser State Information
+ */
 
 struct midi_parser_state {
   enum midi_parser_status status;

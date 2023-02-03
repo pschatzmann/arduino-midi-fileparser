@@ -1,3 +1,6 @@
+/**
+ * We provide a midi file as hex array and parse it incrementally.
+*/
 #include "MidiFile.h"
 #include "example-midi.h"
 #include <algorithm>
@@ -17,7 +20,7 @@ void setup() {
 void loop() {
   if (!mf) return;
 
-  // try to keep buffer filled
+  // Try to keep buffer filled
   if (mf.availableForWrite() > write_size) {
     int len = std::min(write_size, (int)example_mid_len - len);
     if (pos < example_mid_len) {
@@ -29,8 +32,10 @@ void loop() {
     pos += 256;
   }
 
-  // parse midi
+  // Parse midi
   auto state = mf.parse();
+
+  // Process Result
   switch (state.status)
   case MIDI_PARSER_TRACK_MIDI: {
     // process midi
@@ -45,7 +50,9 @@ void loop() {
   case MIDI_PARSER_ERROR:
     printf("Error\n");
   case MIDI_PARSER_EOB:
-#ifndef ARDUINO
+#ifdef ARDUINO
+    while(true);
+#else
     exit(-1);
 #endif
     break;
