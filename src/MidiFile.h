@@ -15,10 +15,22 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "MidiFileCommon.h"
+#include "MidiFileState.h"
+
+#ifndef ARDUINO
+#include <chrono>
+#include <cstdint>
+#include <iostream>
+
+uint64_t millis() {
+  using namespace std::chrono;
+  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+#endif
 
 #define MIDI_BUFFER_SIZE 1024 * 2
 #define MIDI_MIN_REFILL_SIZE 512 
+
 /**
  * @brief Midi File parser. Provide the data via write: You should try to keep
  * the buffer as full as possible while parsing. You get the next parsing result
@@ -69,6 +81,49 @@ public:
     }
     return parser_state;
   }
+
+  /// Parse data in order to provide the next midi element considering the times.
+  midi_parser_state &parseTimed() {
+    static midi_parser_status last_status;
+    static uint64_t timeout=0l;
+
+    // Wait for event to become relevant
+    if (timeout != 0l){
+      if (millis()<timeout){
+        last_status = parser_state.status;
+        parser_state.status = MIDI_PARSER_DELAY;
+        return parser_state;
+      }
+
+      parser_state.status = last_status;
+      if (log_active) {
+        logStatus(last_status);
+      }
+      timeout = 0;
+      return parser_state;
+    }
+
+    // Parse next element
+    parser_state.status = MIDI_PARSER_EOB;
+    if (!parser_state.in.isEmpty()) {
+      midi_parser_status status = midi_parse();
+      // delay result ?
+      if (parser_state.timeInMs()>0){
+        timeout = millis()+parser_state.timeInMs();
+        last_status = status;
+        parser_state.status = MIDI_PARSER_DELAY;
+      } else {
+        parser_state.status = status;
+      }
+    }
+
+    // Update is_ok to false when we have an error or we are at the end
+    if (parser_state.status == MIDI_PARSER_EOB || parser_state.status == MIDI_PARSER_ERROR ){
+      is_ok = false;
+    }
+    return parser_state;  
+  }
+
 
   /// Returns false after an error or when all data has been consumed
   operator bool() {
@@ -236,10 +291,22 @@ protected:
     }
   }
 
-  uint16_t midi_parse_be16(const uint8_t *in) { return (in[0] << 8) | in[1]; }
+  uint16_t midi_parse_be16(const uint8_t *in) { 
+    return (static_cast<uint16_t>(in[0]) << 8) | in[1]; 
+  }
 
   uint32_t midi_parse_be32(const uint8_t *in) {
-    return (in[0] << 24) | (in[1] << 16) | (in[2] << 8) | in[3];
+    return (static_cast<uint32_t>(in[0]) << 24) | (static_cast<uint32_t>(in[1]) << 16) | static_cast<uint32_t>((in[2]) << 8) | in[3];
+  }
+
+  uint64_t midi_parse_N(const uint8_t*from_bytes, int len){
+      uint64_t tmp=0;
+      for (int j=0;j<len;j++){
+        uint64_t byte = from_bytes[j];
+        int shift = 8*(len - j - 1);
+        tmp |= byte << shift;
+      }
+      return tmp;
   }
 
   uint64_t midi_parse_variable_length(int32_t *offset) {
@@ -264,10 +331,11 @@ protected:
 
     parser_state.header.size = midi_parse_be32(parser_state.in.peekStr(4, 4));
     parser_state.header.format = midi_parse_be16(parser_state.in.peekStr(8, 2));
-    parser_state.header.tracks_count =
-        midi_parse_be16(parser_state.in.peekStr(10, 2));
-    parser_state.header.time_division =
-        midi_parse_be16(parser_state.in.peekStr(12, 1));
+    parser_state.header.tracks_count = midi_parse_be16(parser_state.in.peekStr(10, 2));
+    int time_div = midi_parse_be16(parser_state.in.peekStr(12, 2));
+    if (time_div>0){
+      parser_state.header.time_division = time_div;
+    }
 
     parser_state.in.consume(14);
     parser_state.status_internal = MIDI_PARSER_HEADER;
@@ -416,14 +484,20 @@ protected:
         parser_state.in.available() - offset < parser_state.meta.length)
       return MIDI_PARSER_ERROR;
 
-    parser_state.meta.bytes =
-        parser_state.in.peekStr(offset, parser_state.meta.length);
+    parser_state.meta.bytes = parser_state.in.peekStr(offset, parser_state.meta.length);
     offset += parser_state.meta.length;
+
+    // set tempo meta
+    if (parser_state.meta.type==0x51){
+      parser_state.tempo = midi_parse_N(parser_state.meta.bytes, parser_state.meta.length);
+    }
+
     parser_state.in.consume(offset);
     // parser.in.available() -= offset;
     parser_state.track.size -= offset;
     return MIDI_PARSER_TRACK_META;
   }
+
 
   enum midi_parser_status midi_parse_event() {
     parser_state.meta.bytes = NULL;

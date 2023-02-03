@@ -5,6 +5,7 @@
  * @brief MIDI Parser Status
  */
 enum midi_parser_status {
+  MIDI_PARSER_DELAY = -3,
   MIDI_PARSER_EOB = -2,
   MIDI_PARSER_ERROR = -1,
   MIDI_PARSER_INIT = 0,
@@ -24,7 +25,6 @@ enum midi_file_format {
 /**
  * @brief MIDI Header Information
  */
-
 struct midi_header {
   int32_t size;
   uint16_t format;
@@ -53,7 +53,6 @@ enum midi_status {
 /**
  * @brief MIDI Metadata Information
  */
-
 enum midi_meta {
   MIDI_META_SEQ_NUM = 0x00,
   MIDI_META_TEXT = 0x01,
@@ -75,7 +74,6 @@ enum midi_meta {
 /**
  * @brief MIDI Event Information
  */
-
 struct midi_midi_event {
   unsigned status : 4;
   unsigned channel : 4;
@@ -86,7 +84,6 @@ struct midi_midi_event {
 /**
  * @brief MIDI Metadata Event Information
  */
-
 struct midi_meta_event {
   uint8_t type;
   int32_t length;
@@ -96,7 +93,6 @@ struct midi_meta_event {
 /**
  * @brief MIDI Sysex Event Information
  */
-
 struct midi_sysex_event {
   uint8_t sysex;
   uint8_t type;
@@ -107,7 +103,6 @@ struct midi_sysex_event {
 /**
  * @brief MIDI Parser State Information
  */
-
 struct midi_parser_state {
   enum midi_parser_status status;
   enum midi_parser_status status_internal;
@@ -119,9 +114,24 @@ struct midi_parser_state {
 
   /* result */
   int64_t vtime;
+  // microseconds per quarter note - or from latest Set Tempo event
+  uint64_t tempo = 1000;
   struct midi_header header;
   struct midi_track track;
   struct midi_midi_event midi;
   struct midi_meta_event meta;
   struct midi_sysex_event sysex;
+
+  int64_t timeInTicks() {
+    return vtime;
+  }
+
+  uint64_t timeInMs() {
+    float ticks_per_quarter = header.time_division!=0 ? header.time_division: 48;
+    float us_per_quarter = tempo;
+    float us_per_tick = us_per_quarter / ticks_per_quarter;
+    float milliseconds = timeInTicks() * us_per_tick / 1000;
+    return milliseconds;
+  }
+
 };

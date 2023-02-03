@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['operator_20bool_42',['operator bool',['../classMidiFile.html#a16754945cbdab731ac0e32123fe8607f',1,'MidiFile']]],
-  ['operator_5b_5d_43',['operator[]',['../classRingBuffer.html#a17fb46a75a5469507d15969c540ba92a',1,'RingBuffer']]]
+  ['operator_20bool_0',['operator bool',['../classMidiFile.html#a16754945cbdab731ac0e32123fe8607f',1,'MidiFile']]],
+  ['operator_5b_5d_1',['operator[]',['../classRingBuffer.html#a17fb46a75a5469507d15969c540ba92a',1,'RingBuffer']]]
 ];

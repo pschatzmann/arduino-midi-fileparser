@@ -33,14 +33,14 @@ void loop() {
   }
 
   // Parse midi
-  auto state = mf.parse();
+  auto state = mf.parseTimed();  // or parseTimed();
 
   // Process Result
   switch (state.status)
   case MIDI_PARSER_TRACK_MIDI: {
     // process midi
     printf("process");
-    printf("  time: %ld", (long)state.vtime);
+    printf("  time: %ld - %ld", (long)state.timeInTicks(), (long)state.timeInMs());
     printf("  status: %d [%s]", state.midi.status,
            mf.midi_status_name(state.midi.status));
     printf("  channel: %d", state.midi.channel);
@@ -55,6 +55,8 @@ void loop() {
 #else
     exit(-1);
 #endif
+    break;
+    default:
     break;
   }
 }
