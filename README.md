@@ -6,6 +6,10 @@ The original library has been converted to a Header Only C++ Library. Unlike the
 
 It can be used as __Arduino or as cmake library__, so you can also compile, run and debug it on a desktop computer.
 
+## Documentation 
+
+- [MidiFile](https://pschatzmann.github.io/arduino-midi-fileparser/docs/html/classMidiFile.html)
+
 
 
 
