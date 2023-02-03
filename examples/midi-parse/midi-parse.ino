@@ -33,7 +33,7 @@ void loop() {
   }
 
   // Parse midi
-  auto state = mf.parseTimed();  // or parseTimed();
+  auto state = mf.parseTimed();  // or parse();
 
   // Process Result
   switch (state.status)
