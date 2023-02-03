@@ -17,12 +17,13 @@
 #include <string.h>
 #include "MidiFileState.h"
 
+// Compiling outside of Arduino requires the millis() function.
 #ifndef ARDUINO
 #include <chrono>
 #include <cstdint>
 #include <iostream>
 
-uint64_t millis() {
+inline uint64_t millis() {
   using namespace std::chrono;
   return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
@@ -123,7 +124,6 @@ public:
     }
     return parser_state;  
   }
-
 
   /// Returns false after an error or when all data has been consumed
   operator bool() {
