@@ -41,7 +41,7 @@ void setup() {
 
 void loop() {
   // try to keep the parser filled
-  if (mf.availableForWrite()<=80)
+  if (mf.availableForWrite()>=80)
     copier.copy();
 
   // Parse and process the next event
