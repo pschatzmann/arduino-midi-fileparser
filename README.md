@@ -8,7 +8,7 @@ It can be used as __Arduino library or as regular cmake library__, so you can al
 
 ## Documentation 
 
-- [MidiFileParser](https://pschatzmann.github.io/arduino-midi-fileparser/docs/html/classMidiFileParser.html)
+- [MidiFileParser](https://pschatzmann.github.io/arduino-midi-fileparser/docs/html/html/group__midifile.html)
 
 
 ## Installation in Arduino

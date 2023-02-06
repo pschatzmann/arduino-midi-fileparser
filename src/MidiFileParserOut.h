@@ -8,6 +8,7 @@ namespace midi {
 /**
  * @brief Parse the MidiFileParser sending the output to MidiStreamOut.
  * This class requires https://github.com/pschatzmann/arduino-midi
+ * @ingroup midifile
  * @author Phil Schatzmann
  */
 class MidiFileParserOut {

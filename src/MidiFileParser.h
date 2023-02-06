@@ -17,6 +17,13 @@
 #include <stdio.h>
 #include <string.h>
 
+/**
+ * @defgroup midifile Midi File Parser
+ * @brief Midi File Parser
+ */
+
+
+
 // Compiling outside of Arduino requires the millis() function.
 #ifndef ARDUINO
 #include <chrono>
@@ -45,6 +52,7 @@ class Print {
  * @brief Midi File parser. Provide the data via write: You should try to keep
  * the buffer as full as possible while parsing. You get the next parsing result
  * by calling the parse() method.
+ * @ingroup midifile
  * @author Phil Schatzmann
  */
 class MidiFileParser : public Print {
