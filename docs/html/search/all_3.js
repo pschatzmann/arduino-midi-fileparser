@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['end_0',['end',['../classMidiFileParser.html#a790c7392e372f2c69fe6b7b34ad6c14f',1,'MidiFileParser']]],
-  ['equals_1',['equals',['../classRingBuffer.html#ab2ebc0b4b037fc62178d87edc00f5677',1,'RingBuffer']]]
+  ['end_4',['end',['../classmidi_1_1MidiFileParser.html#ae07e5e7161eb4931f09413165f8b70ef',1,'midi::MidiFileParser']]],
+  ['equals_5',['equals',['../classmidi_1_1RingBuffer.html#a583861751422aa94cb45626fed086680',1,'midi::RingBuffer']]]
 ];

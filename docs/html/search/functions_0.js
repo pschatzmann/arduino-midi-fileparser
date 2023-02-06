@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['availableforwrite_0',['availableForWrite',['../classMidiFileParser.html#a0dc2762b4d87af0087f21c9c278c5614',1,'MidiFileParser']]]
+  ['availableforwrite_39',['availableForWrite',['../classmidi_1_1MidiFileParser.html#a1046f0985de526640c1ddaaebfcff943',1,'midi::MidiFileParser']]]
 ];

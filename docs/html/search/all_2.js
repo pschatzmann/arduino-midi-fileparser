@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['consume_0',['consume',['../classRingBuffer.html#a5772d16e5711646ba34d1ff88a5ef580',1,'RingBuffer']]]
+  ['consume_3',['consume',['../classmidi_1_1RingBuffer.html#a49adea581748cecf92b1b3ac99812e69',1,'midi::RingBuffer']]]
 ];
