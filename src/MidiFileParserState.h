@@ -1,6 +1,8 @@
 #pragma once
 #include "RingBuffer.h"
 
+namespace midi {
+
 /**
  * @brief MIDI Parser Status
  */
@@ -110,7 +112,7 @@ struct midi_parser_state {
   unsigned buffered_channel;
 
   /* input buffer */
-  RingBuffer in;
+  midi::RingBuffer in;
 
   /* result */
   int64_t vtime;
@@ -135,3 +137,5 @@ struct midi_parser_state {
   }
 
 };
+
+} // ns

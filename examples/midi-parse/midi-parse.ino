@@ -1,12 +1,14 @@
 /**
  * We provide a midi file as hex array and parse it incrementally.
 */
-#include "MidiFile.h"
-#include "example-midi.h"
+#include "MidiFileParser.h"
+#include "examples/example-midi.h"
 #include <algorithm>
 
+using namespace midi;
+
 const int write_size = 256;
-MidiFile mf;
+MidiFileParser mf;
 int pos = 0;
 bool debug = false;
 

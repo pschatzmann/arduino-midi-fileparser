@@ -6,6 +6,8 @@
 
 #define PEEK_MAX 80
 
+namespace midi {
+
 /**
  * @brief RingBuffer that supports extensive peek operations to 
  * access and compare the next values
@@ -155,3 +157,5 @@ protected:
 
   int nextIndex(int index) { return (uint32_t)(index + 1) % max_size; }
 };
+
+} // namespace

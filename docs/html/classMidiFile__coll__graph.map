@@ -1,4 +1,4 @@
-<map id="MidiFile" name="MidiFile">
+<map id="MidiFileParser" name="MidiFileParser">
 <area shape="rect" id="node1" title="Midi File parser. Provide the data via write: You should try to keep the buffer as full as possible w..." alt="" coords="381,184,454,211"/>
 <area shape="rect" id="node2" href="$structmidi__parser__state.html" title="MIDI Parser State Information." alt="" coords="348,95,487,121"/>
 <area shape="rect" id="node3" href="$classRingBuffer.html" title="RingBuffer that supports extensive peek operations to access and compare the next values." alt="" coords="5,5,96,32"/>

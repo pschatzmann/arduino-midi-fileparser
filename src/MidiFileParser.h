@@ -1,9 +1,9 @@
 /**
- * @file MidiFile.h
+ * @file MidiFileParser.h
  * @author Phil Schatzmann
  * @brief A simple midi parser based on the following project
  * https://github.com/abique/midi-parser
- * 
+ *
  * @version 0.1
  * @date 2023-02-02
  *
@@ -12,10 +12,10 @@
  */
 #pragma once
 
+#include "MidiFileParserState.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "MidiFileState.h"
 
 // Compiling outside of Arduino requires the millis() function.
 #ifndef ARDUINO
@@ -25,12 +25,21 @@
 
 inline uint64_t millis() {
   using namespace std::chrono;
-  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+  return duration_cast<milliseconds>(system_clock::now().time_since_epoch())
+      .count();
 }
 #endif
 
 #define MIDI_BUFFER_SIZE 1024 * 2
-#define MIDI_MIN_REFILL_SIZE 512 
+#define MIDI_MIN_REFILL_SIZE 512
+
+namespace midi {
+
+#ifndef ARDUINO
+class Print {
+  virtual size_t write(uint8_t) = 0;
+};
+#endif
 
 /**
  * @brief Midi File parser. Provide the data via write: You should try to keep
@@ -38,7 +47,7 @@ inline uint64_t millis() {
  * by calling the parse() method.
  * @author Phil Schatzmann
  */
-class MidiFile {
+class MidiFileParser : public Print {
 public:
   /// Initializes & starts the processing
   bool begin(bool log = true, int bufferSize = MIDI_BUFFER_SIZE) {
@@ -49,14 +58,16 @@ public:
     return true;
   }
 
+  size_t write(uint8_t c) override { return write(&c, 1); }
+
   /// Feed/Provide the midi data to the parser
-  size_t write(const uint8_t *data, size_t len) {
+  virtual size_t write(const uint8_t *data, size_t len) {
     // store actual processing length
     if (len > 0) {
       write_len = len;
-    } 
+    }
     // write only if data is available
-    if (len < parser_state.in.availableForWrite()) {
+    if (len <= parser_state.in.availableForWrite()) {
       return parser_state.in.write(data, len);
     }
     return 0;
@@ -77,20 +88,22 @@ public:
       }
     }
     // update is_ok
-    if (parser_state.status == MIDI_PARSER_EOB || parser_state.status == MIDI_PARSER_ERROR ){
+    if (parser_state.status == MIDI_PARSER_EOB ||
+        parser_state.status == MIDI_PARSER_ERROR) {
       is_ok = false;
     }
     return parser_state;
   }
 
-  /// Parse data in order to provide the next midi element considering the times.
+  /// Parse data in order to provide the next midi element considering the
+  /// times.
   midi_parser_state &parseTimed() {
     static midi_parser_status last_status;
-    static uint64_t timeout=0l;
+    static uint64_t timeout = 0l;
 
     // Wait for event to become relevant
-    if (timeout != 0l){
-      if (millis()<timeout){
+    if (timeout != 0l) {
+      if (millis() < timeout) {
         last_status = parser_state.status;
         parser_state.status = MIDI_PARSER_DELAY;
         return parser_state;
@@ -109,8 +122,8 @@ public:
     if (!parser_state.in.isEmpty()) {
       midi_parser_status status = midi_parse();
       // delay result ?
-      if (parser_state.timeInMs()>0){
-        timeout = millis()+parser_state.timeInMs();
+      if (parser_state.timeInMs() > 0) {
+        timeout = millis() + parser_state.timeInMs();
         last_status = status;
         parser_state.status = MIDI_PARSER_DELAY;
       } else {
@@ -119,20 +132,18 @@ public:
     }
 
     // Update is_ok to false when we have an error or we are at the end
-    if (parser_state.status == MIDI_PARSER_EOB || parser_state.status == MIDI_PARSER_ERROR ){
+    if (parser_state.status == MIDI_PARSER_EOB ||
+        parser_state.status == MIDI_PARSER_ERROR) {
       is_ok = false;
     }
-    return parser_state;  
+    return parser_state;
   }
 
   /// Returns false after an error or when all data has been consumed
-  operator bool() {
-    return is_ok;
-  }
+  operator bool() { return is_ok; }
 
   /// Ends the processing: currently does nothing
-  void end() {
-  }
+  void end() {}
 
   /// Provides the string description for the midi_status value
   const char *midi_status_name(int status) {
@@ -157,7 +168,7 @@ public:
     }
   }
 
-  /// Provides the string description for the file format 
+  /// Provides the string description for the file format
   const char *midi_file_format_name(int fmt) {
     switch (fmt) {
     case MIDI_FILE_FORMAT_SINGLE_TRACK:
@@ -268,6 +279,9 @@ protected:
       printf("  time: %ld\n", (long)parser_state.vtime);
       break;
 
+    case MIDI_PARSER_DELAY:
+      break;
+
     default:
       printf("\nunhandled state: %d\n", status);
       break;
@@ -291,22 +305,24 @@ protected:
     }
   }
 
-  uint16_t midi_parse_be16(const uint8_t *in) { 
-    return (static_cast<uint16_t>(in[0]) << 8) | in[1]; 
+  uint16_t midi_parse_be16(const uint8_t *in) {
+    return (static_cast<uint16_t>(in[0]) << 8) | in[1];
   }
 
   uint32_t midi_parse_be32(const uint8_t *in) {
-    return (static_cast<uint32_t>(in[0]) << 24) | (static_cast<uint32_t>(in[1]) << 16) | static_cast<uint32_t>((in[2]) << 8) | in[3];
+    return (static_cast<uint32_t>(in[0]) << 24) |
+           (static_cast<uint32_t>(in[1]) << 16) |
+           static_cast<uint32_t>((in[2]) << 8) | in[3];
   }
 
-  uint64_t midi_parse_N(const uint8_t*from_bytes, int len){
-      uint64_t tmp=0;
-      for (int j=0;j<len;j++){
-        uint64_t byte = from_bytes[j];
-        int shift = 8*(len - j - 1);
-        tmp |= byte << shift;
-      }
-      return tmp;
+  uint64_t midi_parse_N(const uint8_t *from_bytes, int len) {
+    uint64_t tmp = 0;
+    for (int j = 0; j < len; j++) {
+      uint64_t byte = from_bytes[j];
+      int shift = 8 * (len - j - 1);
+      tmp |= byte << shift;
+    }
+    return tmp;
   }
 
   uint64_t midi_parse_variable_length(int32_t *offset) {
@@ -331,9 +347,10 @@ protected:
 
     parser_state.header.size = midi_parse_be32(parser_state.in.peekStr(4, 4));
     parser_state.header.format = midi_parse_be16(parser_state.in.peekStr(8, 2));
-    parser_state.header.tracks_count = midi_parse_be16(parser_state.in.peekStr(10, 2));
+    parser_state.header.tracks_count =
+        midi_parse_be16(parser_state.in.peekStr(10, 2));
     int time_div = midi_parse_be16(parser_state.in.peekStr(12, 2));
-    if (time_div>0){
+    if (time_div > 0) {
       parser_state.header.time_division = time_div;
     }
 
@@ -381,7 +398,7 @@ protected:
       cont = b & 0x80;
     }
 
-    if (parser_state.in.available()<nbytes){
+    if (parser_state.in.available() < nbytes) {
       return false;
     }
 
@@ -484,12 +501,14 @@ protected:
         parser_state.in.available() - offset < parser_state.meta.length)
       return MIDI_PARSER_ERROR;
 
-    parser_state.meta.bytes = parser_state.in.peekStr(offset, parser_state.meta.length);
+    parser_state.meta.bytes =
+        parser_state.in.peekStr(offset, parser_state.meta.length);
     offset += parser_state.meta.length;
 
     // set tempo meta
-    if (parser_state.meta.type==0x51){
-      parser_state.tempo = midi_parse_N(parser_state.meta.bytes, parser_state.meta.length);
+    if (parser_state.meta.type == 0x51) {
+      parser_state.tempo =
+          midi_parse_N(parser_state.meta.bytes, parser_state.meta.length);
     }
 
     parser_state.in.consume(offset);
@@ -497,7 +516,6 @@ protected:
     parser_state.track.size -= offset;
     return MIDI_PARSER_TRACK_META;
   }
-
 
   enum midi_parser_status midi_parse_event() {
     parser_state.meta.bytes = NULL;
@@ -547,3 +565,5 @@ protected:
     }
   }
 };
+
+} // namespace midi
