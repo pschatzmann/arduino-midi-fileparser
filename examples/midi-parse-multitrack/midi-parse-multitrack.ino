@@ -29,7 +29,7 @@ void setup() {
     if (pos < example_mid_len) {
       written = mf.write(example_mid + pos, len);
     } else {
-      //mf.endWrite();
+      // mf.endWrite(); // parse final unparsed bytes
       break;
     }
     pos += written;

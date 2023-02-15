@@ -89,7 +89,7 @@ struct midi_midi_event {
  */
 struct midi_time_event : public midi_midi_event {
   /// @brief  cummulated time in milliseconds
-  uint64_t time_ms;
+  uint32_t time_ms;
   operator bool() { return status != 0; }
 };
 

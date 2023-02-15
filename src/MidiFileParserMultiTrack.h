@@ -234,7 +234,11 @@ public:
 
   /// Marks that we are done with writing the data to prepare for parse() and
   /// parseTimed() calls.
-  void endWrite() { parser.setState(MIDI_PARSER_EOB); }
+  void endWrite() { 
+    parser.setState(MIDI_PARSER_EOB);
+    // force to parse the remaining bytes
+    parse(0);
+  }
 
   /// Provides the string description for the midi_status value
   const char *midi_status_name(int status) {

@@ -34,7 +34,7 @@ void setup() {
 void loop() {
 
   // Parse midi
-  auto state = parser.parseTimed(); // parseTimed() or parse();
+  auto state = parser.parse(); // parseTimed() or parse();
 
   // Process Result
   switch (state.status)
