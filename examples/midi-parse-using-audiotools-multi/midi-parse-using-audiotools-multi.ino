@@ -7,6 +7,7 @@
 #include "AudioTools.h" // https://github.com/pschatzmann/arduino-audio-tools
 #include "MidiFileParserMultiTrack.h"
 #include "examples/example-midi.h"
+//#include "esp_heap_caps.h"
 
 using namespace midi;
 
@@ -15,17 +16,22 @@ MidiFileParser parser;  // use MidiFileParserMultiTrack or MidiFileParser
 MemoryStream midi_data(example_mid, example_mid_len);
 StreamCopy copy(parser, midi_data, write_size);
 bool debug = false;
+//const int psram_limit = 8;
 
 void setup() {
   Serial.begin(115200);
   parser.begin(debug, 256 * 5);
+
+  // use psram
+  //heap_caps_malloc_extmem_enable(psram_limit);
+
+  // load data to parser
+  copy.copyAll();
+  // data has been loaded
+  printf("Number of events: %ld\n", (long)parser.size());
 }
 
 void loop() {
-  // Try to keep buffer filled
-  if (parser.availableForWrite() > write_size) {
-    copy.copy();
-  }
 
   // Parse midi
   auto state = parser.parse(); // parseTimed() or parse();
@@ -44,7 +50,8 @@ void loop() {
   case MIDI_PARSER_ERROR:
     Serial.println("Error\n");
   case MIDI_PARSER_EOB:
-    stop();
+    while (true)
+      ;
     break;
   default:
     break;
