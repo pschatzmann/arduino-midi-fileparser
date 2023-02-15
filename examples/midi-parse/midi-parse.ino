@@ -1,6 +1,10 @@
 /**
  * We provide a midi file as hex array and parse it incrementally.
-*/
+ * This sketch has quite some complexity for reading the data. 
+ * This can be avoided when you use the MemoryStream and StreamCopy 
+ * from the AudioTools project.
+ * @author Phil Schatzmann
+ */
 #include "MidiFileParser.h"
 #include "examples/example-midi.h"
 #include <algorithm>
@@ -14,7 +18,7 @@ bool debug = false;
 
 void setup() {
 #ifdef ARDUINO
-  Serial.begin(19200);
+  Serial.begin(115200);
 #endif
   mf.begin(debug, 256 * 5);
 }
