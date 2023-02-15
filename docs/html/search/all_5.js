@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['operator_20bool_19',['operator bool',['../classmidi_1_1MidiFileParser.html#a2a6b1adb28b63f814a8f6da60da8cc51',1,'midi::MidiFileParser']]],
-  ['operator_5b_5d_20',['operator[]',['../classmidi_1_1RingBuffer.html#a41bd5105a362763778d0a8e27d3bcf23',1,'midi::RingBuffer']]]
+  ['isempty_10',['isEmpty',['../classmidi_1_1multichannel__segment__tracks.html#a885bc5c9546339e4c60d74c6c4f9ac56',1,'midi::multichannel_segment_tracks::isEmpty()'],['../classmidi_1_1MidiFileParserMultiTrack.html#a73b9a31c1e5e3253b09a8540f5e668e3',1,'midi::MidiFileParserMultiTrack::isEmpty()']]]
 ];

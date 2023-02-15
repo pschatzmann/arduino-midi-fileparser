@@ -1,7 +1,7 @@
 <map id="midi::MidiFileParserOut" name="midi::MidiFileParserOut">
-<area shape="rect" id="node1" title="Parse the MidiFileParser sending the output to MidiStreamOut. This class requires https://github...." alt="" coords="828,107,1001,133"/>
-<area shape="rect" id="node2" href="$classmidi_1_1MidiFileParser.html" title="Midi File parser. Provide the data via write: You should try to keep the buffer as full as possible w..." alt="" coords="589,107,740,133"/>
-<area shape="rect" id="node3" href="$classmidi_1_1Print.html" title=" " alt="" coords="323,81,413,108"/>
+<area shape="rect" id="node1" title="Parse the MidiFileParser sending the output to MidiStreamOut. This class requires https://github...." alt="" coords="824,100,997,127"/>
+<area shape="rect" id="node2" href="$classmidi_1_1MidiFileParser.html" title="Midi File parser. Provide the data via write: You should try to keep the buffer as full as possible w..." alt="" coords="585,100,736,127"/>
+<area shape="rect" id="node3" href="$classmidi_1_1Print.html" title=" " alt="" coords="323,68,413,95"/>
 <area shape="rect" id="node4" href="$structmidi_1_1midi__parser__state.html" title="MIDI Parser State Information." alt="" coords="280,132,456,159"/>
 <area shape="rect" id="node5" href="$structmidi_1_1midi__sysex__event.html" title="MIDI Sysex Event Information." alt="" coords="5,5,183,32"/>
 <area shape="rect" id="node6" href="$structmidi_1_1midi__header.html" title="MIDI Header Information." alt="" coords="24,56,164,83"/>

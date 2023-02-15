@@ -117,6 +117,7 @@ public:
 
   /// @brief returns a temporary copy of the requested bytes
   uint8_t *peekStr(int idx, int len) {
+    if (len==0) return 0;
     static uint8_t tmp_copy[PEEK_MAX];
     assert(len < PEEK_MAX);
     assert(idx+len<available());

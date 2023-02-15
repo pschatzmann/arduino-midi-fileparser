@@ -93,8 +93,8 @@ Collaboration diagram for midi::MidiFileParser:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmidi_1_1MidiFileParser__coll__graph.png" border="0" usemap="#amidi_1_1MidiFileParser_coll__map" alt="Collaboration graph"/></div>
 <map name="amidi_1_1MidiFileParser_coll__map" id="amidi_1_1MidiFileParser_coll__map">
-<area shape="rect" title="Midi File parser. Provide the data via write: You should try to keep the buffer as full as possible w..." alt="" coords="589,107,740,133"/>
-<area shape="rect" href="classmidi_1_1Print.html" title=" " alt="" coords="323,81,413,108"/>
+<area shape="rect" title="Midi File parser. Provide the data via write: You should try to keep the buffer as full as possible w..." alt="" coords="585,100,736,127"/>
+<area shape="rect" href="classmidi_1_1Print.html" title=" " alt="" coords="323,68,413,95"/>
 <area shape="rect" href="structmidi_1_1midi__parser__state.html" title="MIDI Parser State Information." alt="" coords="280,132,456,159"/>
 <area shape="rect" href="structmidi_1_1midi__sysex__event.html" title="MIDI Sysex Event Information." alt="" coords="5,5,183,32"/>
 <area shape="rect" href="structmidi_1_1midi__header.html" title="MIDI Header Information." alt="" coords="24,56,164,83"/>
@@ -151,6 +151,9 @@ const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:a77016a722463f639a3d7d40634d0e7c3"><td class="memItemLeft" align="right" valign="top"><a id="a77016a722463f639a3d7d40634d0e7c3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setState</b> (midi_parser_status state)</td></tr>
+<tr class="separator:a77016a722463f639a3d7d40634d0e7c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23e0cf4edc75f7be76e71ebf766106bb"><td class="memItemLeft" align="right" valign="top"><a id="a23e0cf4edc75f7be76e71ebf766106bb"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>logStatus</b> (midi_parser_status status)</td></tr>
 <tr class="separator:a23e0cf4edc75f7be76e71ebf766106bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -199,6 +202,9 @@ enum midi_parser_status&#160;</td><td class="memItemRight" valign="bottom"><b>mi
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:ab37301a21f557e0d97eb8e745afff680"><td class="memItemLeft" align="right" valign="top"><a id="ab37301a21f557e0d97eb8e745afff680"></a>
+friend&#160;</td><td class="memItemRight" valign="bottom"><b>MidiFileParserMultiTrack</b></td></tr>
+<tr class="separator:ab37301a21f557e0d97eb8e745afff680"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35df661f71c22e82b6ac841c5f7cc635"><td class="memItemLeft" align="right" valign="top"><a id="a35df661f71c22e82b6ac841c5f7cc635"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>log_active</b> = false</td></tr>
 <tr class="separator:a35df661f71c22e82b6ac841c5f7cc635"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -211,6 +217,15 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>write_len</b> = 256</t
 <tr class="memitem:a3f9f62b81a5d3138b2a8291e3c11f00e"><td class="memItemLeft" align="right" valign="top"><a id="a3f9f62b81a5d3138b2a8291e3c11f00e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_ok</b> = true</td></tr>
 <tr class="separator:a3f9f62b81a5d3138b2a8291e3c11f00e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42595d52bc29171251497ec0b1157304"><td class="memItemLeft" align="right" valign="top"><a id="a42595d52bc29171251497ec0b1157304"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>track_no</b> = 0</td></tr>
+<tr class="separator:a42595d52bc29171251497ec0b1157304"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a778f50becae859294a48302ec9c18f"><td class="memItemLeft" align="right" valign="top"><a id="a6a778f50becae859294a48302ec9c18f"></a>
+<a class="el" href="structmidi_1_1midi__parser__state.html">midi_parser_state</a>&#160;</td><td class="memItemRight" valign="bottom"><b>not_ready</b> {MIDI_PARSER_DELAY}</td></tr>
+<tr class="separator:a6a778f50becae859294a48302ec9c18f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c0ebe269da75ecc81508cea308645b5"><td class="memItemLeft" align="right" valign="top"><a id="a5c0ebe269da75ecc81508cea308645b5"></a>
+<a class="el" href="structmidi_1_1midi__parser__state.html">midi_parser_state</a>&#160;</td><td class="memItemRight" valign="bottom"><b>eob</b> {MIDI_PARSER_EOB}</td></tr>
+<tr class="separator:a5c0ebe269da75ecc81508cea308645b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Midi File parser. Provide the data via write: You should try to keep the buffer as full as possible while parsing. You get the next parsing result by calling the <a class="el" href="classmidi_1_1MidiFileParser.html#a0c4097975bcf7c4a1d19c377943bf227" title="Parse data in order to provide the next midi element.">parse()</a> method. </p>

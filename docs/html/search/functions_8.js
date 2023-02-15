@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['write_56',['write',['../classmidi_1_1MidiFileParser.html#ab10d13081d391398ec80bf2ad3a2abfe',1,'midi::MidiFileParser']]]
+  ['nextevent_73',['nextEvent',['../classmidi_1_1multichannel__segment__tracks.html#abd2d16ad792d4d417abacfadb167d56b',1,'midi::multichannel_segment_tracks']]]
 ];

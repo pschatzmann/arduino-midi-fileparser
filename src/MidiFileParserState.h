@@ -39,6 +39,7 @@ struct midi_header {
  */
 struct midi_track {
   int32_t size;
+  int32_t number; // track number
 };
 
 enum midi_status {
@@ -84,6 +85,16 @@ struct midi_midi_event {
 };
 
 /**
+ * A midi event with the corresponding (cummulated) time
+ */
+struct midi_time_event : public midi_midi_event {
+  /// @brief  cummulated time in milliseconds
+  uint64_t time_ms;
+  operator bool() { return status != 0; }
+};
+
+
+/**
  * @brief MIDI Metadata Event Information
  */
 struct midi_meta_event {
@@ -106,6 +117,10 @@ struct midi_sysex_event {
  * @brief MIDI Parser State Information
  */
 struct midi_parser_state {
+  midi_parser_state() = default;
+  midi_parser_state(midi_parser_status status){
+    this->status = status;
+  }
   enum midi_parser_status status;
   enum midi_parser_status status_internal;
   enum midi_status buffered_status;
@@ -116,6 +131,7 @@ struct midi_parser_state {
 
   /* result */
   int64_t vtime;
+  int64_t vtime_ms=0;
   // microseconds per quarter note - or from latest Set Tempo event
   uint64_t tempo = 1000;
   struct midi_header header;
@@ -129,6 +145,7 @@ struct midi_parser_state {
   }
 
   uint64_t timeInMs() {
+    if (vtime_ms!=0) return vtime_ms;
     float ticks_per_quarter = header.time_division!=0 ? header.time_division: 48;
     float us_per_quarter = tempo;
     float us_per_tick = us_per_quarter / ticks_per_quarter;

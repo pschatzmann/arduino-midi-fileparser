@@ -48,6 +48,9 @@ class Print {
 };
 #endif
 
+class MidiFileParserMultiTrack;
+
+
 /**
  * @brief Midi File parser. Provide the data via write: You should try to keep
  * the buffer as full as possible while parsing. You get the next parsing result
@@ -60,6 +63,7 @@ public:
   /// Initializes & starts the processing
   bool begin(bool log = true, int bufferSize = MIDI_BUFFER_SIZE) {
     log_active = log;
+    track_no = 0;
     parser_state.in.resize(bufferSize);
     is_ok = true;
     reset();
@@ -106,34 +110,25 @@ public:
   /// Parse data in order to provide the next midi element considering the
   /// times.
   midi_parser_state &parseTimed() {
-    static midi_parser_status last_status;
     static uint64_t timeout = 0l;
 
     // Wait for event to become relevant
     if (timeout != 0l) {
       if (millis() < timeout) {
-        last_status = parser_state.status;
-        parser_state.status = MIDI_PARSER_DELAY;
-        return parser_state;
+        return not_ready;
       }
 
-      parser_state.status = last_status;
-      if (log_active) {
-        logStatus(last_status);
-      }
       timeout = 0;
       return parser_state;
     }
 
     // Parse next element
-    parser_state.status = MIDI_PARSER_EOB;
     if (!parser_state.in.isEmpty()) {
       midi_parser_status status = midi_parse();
       // delay result ?
       if (parser_state.timeInMs() > 0) {
         timeout = millis() + parser_state.timeInMs();
-        last_status = status;
-        parser_state.status = MIDI_PARSER_DELAY;
+        return not_ready;
       } else {
         parser_state.status = status;
       }
@@ -143,6 +138,7 @@ public:
     if (parser_state.status == MIDI_PARSER_EOB ||
         parser_state.status == MIDI_PARSER_ERROR) {
       is_ok = false;
+      return eob;
     }
     return parser_state;
   }
@@ -230,11 +226,24 @@ public:
     }
   }
 
+
 protected:
+  friend MidiFileParserMultiTrack;
   bool log_active = false;
   int write_len = 256;
   midi_parser_state parser_state;
   bool is_ok = true;
+  int track_no = 0;
+  midi_parser_state not_ready{MIDI_PARSER_DELAY};
+  midi_parser_state eob{MIDI_PARSER_EOB};
+
+  void setState(midi_parser_status state){
+    parser_state.status = state;
+    if (parser_state.status == MIDI_PARSER_EOB ||
+        parser_state.status == MIDI_PARSER_ERROR) {
+      is_ok = false;
+    }
+  }
 
   void logStatus(midi_parser_status status) {
     switch (status) {
@@ -372,6 +381,7 @@ protected:
       return MIDI_PARSER_EOB;
 
     parser_state.track.size = midi_parse_be32(parser_state.in.peekStr(0, 4));
+    parser_state.track.number = ++track_no;
     parser_state.status_internal = MIDI_PARSER_TRACK;
     parser_state.in.consume(8);
     // parser.in.available() -= 8;

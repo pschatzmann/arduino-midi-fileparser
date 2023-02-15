@@ -24,18 +24,19 @@ void loop() {
 
   // Try to keep buffer filled
   if (mf.availableForWrite() > write_size) {
+    int written = 0;
     int len = std::min(write_size, (int)example_mid_len - len);
     if (pos < example_mid_len) {
-      mf.write(example_mid + pos, len);
+      written = mf.write(example_mid + pos, len);
     } else {
       // when there is no more data we let the parser know
       mf.end();
     }
-    pos += 256;
+    pos += written;
   }
 
   // Parse midi
-  auto state = mf.parseTimed();  // or parse();
+  auto state = mf.parse();  // parseTimed() or parse();
 
   // Process Result
   switch (state.status)
