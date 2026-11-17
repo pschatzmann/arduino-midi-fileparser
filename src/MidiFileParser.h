@@ -86,7 +86,7 @@ public:
   }
 
   /// Max number of bytes that we can write
-  int32_t availableForWrite() { return parser_state.in.availableForWrite(); }
+  int availableForWrite() { return parser_state.in.availableForWrite(); }  // int: like Print
 
   /// Parse data in order to provide the next midi element
   midi_parser_state &parse() {
