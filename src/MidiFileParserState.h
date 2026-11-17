@@ -99,8 +99,8 @@ struct midi_time_event : public midi_midi_event {
  */
 struct midi_meta_event {
   uint8_t type;
-  int32_t length;
-  const uint8_t *bytes; // reference to the input buffer
+  int32_t length; // number of bytes in bytes (truncated to PEEK_MAX)
+  const uint8_t *bytes; // payload (max PEEK_MAX bytes), valid until next parse()
 };
 
 /**
@@ -109,8 +109,8 @@ struct midi_meta_event {
 struct midi_sysex_event {
   uint8_t sysex;
   uint8_t type;
-  int32_t length;
-  const uint8_t *bytes; // reference to the input buffer
+  int32_t length; // number of bytes in bytes (truncated to PEEK_MAX)
+  const uint8_t *bytes; // payload (max PEEK_MAX bytes), valid until next parse()
 };
 
 /**

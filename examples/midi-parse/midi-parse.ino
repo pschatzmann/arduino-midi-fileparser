@@ -29,7 +29,7 @@ void loop() {
   // Try to keep buffer filled
   if (mf.availableForWrite() > write_size) {
     int written = 0;
-    int len = std::min(write_size, (int)example_mid_len - len);
+    int len = std::min(write_size, (int)example_mid_len - pos);
     if (pos < example_mid_len) {
       written = mf.write(example_mid + pos, len);
     } else {

@@ -4,7 +4,9 @@
 #include <string.h>
 #include <assert.h>
 
+#ifndef PEEK_MAX
 #define PEEK_MAX 80
+#endif
 
 namespace midi {
 
@@ -22,7 +24,7 @@ public:
     reset();
   }
 
-  RingBuffer(int size) {
+  RingBuffer(int32_t size) {
     resize(size);
     reset();
   }
@@ -57,8 +59,8 @@ public:
     return result;
   }
 
-  int write(const uint8_t *data, size_t len) {
-    for (int j = 0; j < len; j++) {
+  int32_t write(const uint8_t *data, size_t len) {
+    for (int32_t j = 0; j < (int32_t)len; j++) {
       if (!write(data[j])) {
         return j;
       }
@@ -74,12 +76,12 @@ public:
   }
 
   // provides the number of entries that are available to read
-  int available() { return _numElems; }
+  int32_t available() { return _numElems; }
 
   // provides the number of entries that are available to write
-  int availableForWrite() { return (max_size - _numElems); }
+  int32_t availableForWrite() { return (max_size - _numElems); }
 
-  void resize(int len) {
+  void resize(int32_t len) {
     // if no change: we can leave
     if (this->max_size==len && _aucBuffer!=nullptr){
       return;
@@ -97,7 +99,7 @@ public:
   }
 
   /// Returns the maximum capacity of the buffer
-  int size() { return max_size; }
+  int32_t size() { return max_size; }
 
   // peeks the actual entry from the buffer
   int peek() {
@@ -108,28 +110,38 @@ public:
   }
 
   /// @brief peeks the idx next entry from the buffer
-  int peek(int idx) {
-    if (idx > available())
+  int peek(int32_t idx) {
+    if (idx < 0 || idx >= available())
       return -1;
-    int tmp_tail = (_iTail + idx) % max_size;
+    int32_t tmp_tail = (_iTail + idx) % max_size;
     return _aucBuffer[tmp_tail];
   }
 
-  /// @brief returns a temporary copy of the requested bytes
-  uint8_t *peekStr(int idx, int len) {
-    if (len==0) return 0;
-    static uint8_t tmp_copy[PEEK_MAX];
-    assert(len < PEEK_MAX);
-    assert(idx+len<available());
-    memset(&tmp_copy, 0, PEEK_MAX);
-    for (int j = 0; j < len; j++) {
-      tmp_copy[j] = peek(idx + j);
+  /// @brief Copies len bytes starting at idx into dest (without consuming
+  /// them). Returns the number of bytes copied, which is limited by the
+  /// available data.
+  int32_t peekInto(int32_t idx, uint8_t *dest, int32_t len) {
+    int32_t n = 0;
+    for (; n < len && idx + n < available(); n++) {
+      dest[n] = peek(idx + n);
     }
+    return n;
+  }
+
+  /// @brief returns a temporary copy of the requested bytes. The result is
+  /// only valid until the next call of peekStr()!
+  uint8_t *peekStr(int32_t idx, int32_t len) {
+    if (len <= 0) return nullptr;
+    static uint8_t tmp_copy[PEEK_MAX];
+    assert(len <= PEEK_MAX);
+    assert(idx + len <= available());
+    memset(tmp_copy, 0, PEEK_MAX);
+    peekInto(idx, tmp_copy, len);
     return tmp_copy;
   }
 
   /// @brief alternaive syntax to peek(idx)
-  uint8_t operator[](int idx) {
+  uint8_t operator[](int32_t idx) {
     int result = peek(idx);
     assert(result!=-1);
     return result;
@@ -137,26 +149,27 @@ public:
 
   /// @brief Compares the string with the current peek values
   bool equals(const char *str) {
-    int len = strlen(str);
+    int32_t len = strlen(str);
+    if (len > available()) return false;
     return strncmp(str, (char*)peekStr(0, len), len) == 0;
   }
 
   /// @brief Removes the next n characters from the ringbuffer
-  void consume(int offset) {
+  void consume(int32_t offset) {
     assert(available() >= offset);
-    for (int j = 0; j < offset; j++) {
+    for (int32_t j = 0; j < offset; j++) {
       read();
     }
   }
 
 protected:
   uint8_t *_aucBuffer = nullptr;
-  int _iHead;
-  int _iTail;
-  int _numElems;
-  int max_size = 0;
+  int32_t _iHead = 0;
+  int32_t _iTail = 0;
+  int32_t _numElems = 0;
+  int32_t max_size = 0;
 
-  int nextIndex(int index) { return (uint32_t)(index + 1) % max_size; }
+  int32_t nextIndex(int32_t index) { return (uint32_t)(index + 1) % max_size; }
 };
 
 } // namespace
